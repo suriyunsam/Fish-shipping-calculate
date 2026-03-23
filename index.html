@@ -374,9 +374,8 @@ function calcAll(){
   let uspsForGrand=[];
   let deliveryFee=0;
 
-  if(fish>=15){wnEl.style.display='block';uspsEl.innerHTML='';db.classList.remove('on');gtCard.style.display='none';}
-  else{
-    wnEl.style.display='none';
+  wnEl.style.display=fish>=15?'block':'none';
+  {
     if(actualLb>0&&zv.length===5){
       const zone=gz(zv);
       if(zone){
@@ -386,7 +385,7 @@ function calcAll(){
           if(cuIn>1728){let msg=`Dim weight: <strong>${dimLb.toFixed(2)} lb</strong> (${side}³÷139) · น้ำหนักจริง: ${actualLb.toFixed(2)} lb · `;msg+=useDim?`<span class="dimhl">ใช้ dim weight ${dimLb.toFixed(2)} lb</span>`:`ใช้น้ำหนักจริง ${actualLb.toFixed(2)} lb`;db.innerHTML=msg;}
           else{db.innerHTML=`กล่อง ${side}" = ${cuIn} cu in ≤ 1,728 cu in → ไม่คิด dim weight`;}
           db.classList.add('on');
-        }else db.classList.remove('on');
+        }else{db.innerHTML='Wholesale — ขนาดกล่องตามสั่ง ไม่คิด dim weight';db.classList.add('on');}
 
         const isPM=document.getElementById('svcPM').checked;
         const allSvcs=[
