@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fish Shipping Calculator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede9;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#9e9d99;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);--border3:rgba(0,0,0,0.28);
+  --blue50:#E6F1FB;--blue100:#B5D4F4;--blue400:#378ADD;--blue600:#185FA5;--blue800:#0C447C;
+  --green50:#EAF3DE;--green100:#C0DD97;--green600:#3B6D11;--green800:#27500A;
+  --amber50:#FAEEDA;--amber100:#FAC775;--amber600:#854F0B;--amber800:#633806;
+  --red50:#FCEBEB;--red100:#F7C1C1;--red400:#E24B4A;--red600:#A32D2D;--red800:#791F1F;
+  --teal50:#E1F5EE;--teal600:#0F6E56;
+  --coral50:#FAECE7;--coral600:#993C1D;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#252523;--bg3:#2c2c2a;
+    --text:#f0efe9;--text2:#a0a09a;--text3:#68685f;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--border3:rgba(255,255,255,0.22);
+    --blue50:#0c2d4a;--blue100:#0c447c;--blue400:#378ADD;--blue600:#85B7EB;--blue800:#B5D4F4;
+    --green50:#1a2e0a;--green100:#27500A;--green600:#97C459;--green800:#C0DD97;
+    --amber50:#2e1e08;--amber100:#633806;--amber600:#EF9F27;--amber800:#FAC775;
+    --red50:#2e0e0e;--red100:#791F1F;--red400:#E24B4A;--red600:#F09595;--red800:#F7C1C1;
+    --teal50:#0a2419;--teal600:#5DCAA5;
+    --coral50:#2e1208;--coral600:#F0997B;
+  }
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:2rem 1rem 4rem}
+.app{max-width:520px;margin:0 auto}
+.page-title{font-size:20px;font-weight:500;letter-spacing:-0.02em;margin-bottom:0.25rem}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:1.75rem}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:10px}
+.card-title{font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.field-label{font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.field-divider{height:1px;background:var(--border);margin:14px 0}
+
+/* Fish count */
+.fish-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fish-input{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;width:90px;padding:8px 12px;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);text-align:center;-moz-appearance:textfield}
+.fish-input::-webkit-inner-spin-button,.fish-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.fish-input:focus{outline:none;border-color:var(--blue400);box-shadow:0 0 0 3px var(--blue50)}
+.box-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--blue50);color:var(--blue800);border:0.5px solid var(--blue100);white-space:nowrap}
+
+/* Pack selector */
+.pack-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.pack-opt{padding:9px 6px;border-radius:10px;border:0.5px solid var(--border);background:var(--bg2);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pack-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;opacity:0.4}
+.pack-opt:hover{background:var(--bg3)}
+.pack-opt.sel-none{border-color:var(--border3);color:var(--text)}
+.pack-opt.sel-heat{border-color:#F09595;background:var(--red50);color:var(--red800)}
+.pack-opt.sel-heat .pack-dot{background:var(--red400);border-color:var(--red400);opacity:1}
+.pack-opt.sel-cold{border-color:var(--blue100);background:var(--blue50);color:var(--blue800)}
+.pack-opt.sel-cold .pack-dot{background:var(--blue400);border-color:var(--blue400);opacity:1}
+
+/* Text inputs */
+.input-wrap{position:relative;margin-top:4px}
+.input-prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3);pointer-events:none}
+.text-input{width:100%;font-family:'DM Mono',monospace;font-size:15px;padding:10px 12px 10px 26px;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);-moz-appearance:textfield}
+.text-input::-webkit-inner-spin-button,.text-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.text-input:focus{outline:none;border-color:var(--blue400);box-shadow:0 0 0 3px var(--blue50)}
+.plain-input{width:100%;font-family:'DM Mono',monospace;font-size:15px;padding:10px 12px;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);letter-spacing:2px}
+.plain-input:focus{outline:none;border-color:var(--blue400);box-shadow:0 0 0 3px var(--blue50)}
+.plain-input.inv{border-color:var(--red400)}
+select{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);cursor:pointer}
+select:focus{outline:none;border-color:var(--blue400);box-shadow:0 0 0 3px var(--blue50)}
+
+/* Toggle checkbox */
+.toggle-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0}
+.toggle-row+.toggle-row{border-top:0.5px solid var(--border)}
+.toggle-row input[type=checkbox]{width:16px;height:16px;margin-top:2px;cursor:pointer;accent-color:var(--blue400);flex-shrink:0}
+.toggle-info{flex:1}
+.toggle-label{font-size:14px;font-weight:500;color:var(--text);cursor:pointer}
+.toggle-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.fuel-rate-row{display:flex;align-items:center;gap:8px;margin-top:10px;margin-left:26px}
+.fuel-input{font-family:'DM Mono',monospace;font-size:14px;width:70px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);-moz-appearance:textfield;text-align:center}
+.fuel-input::-webkit-inner-spin-button,.fuel-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.fuel-input:focus{outline:none;border-color:var(--blue400)}
+.fuel-pct{font-size:14px;color:var(--text2)}
+
+/* Zone pill */
+.zone-hint{font-size:12px;color:var(--text3);margin-top:6px}
+.zpill{display:inline-block;font-size:12px;font-weight:500;padding:2px 10px;border-radius:6px;margin-left:8px}
+.z1,.z2{background:var(--teal50);color:var(--teal600)}
+.z3,.z4{background:var(--blue50);color:var(--blue600)}
+.z5,.z6{background:var(--amber50);color:var(--amber600)}
+.z7,.z8{background:var(--coral50);color:var(--coral600)}
+
+/* dim weight box */
+.dimbox{font-size:12px;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--bg2);color:var(--text2);display:none;border:0.5px solid var(--border)}
+.dimbox.on{display:block}
+.dimhl{color:var(--red600);font-weight:500}
+
+/* Breakdown */
+.breakdown-card{background:var(--bg2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
+.bd-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.bd-row+.bd-row{border-top:0.5px solid var(--border)}
+.bd-label{font-size:13px;color:var(--text2)}
+.bd-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--text)}
+.total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:4px;border-top:0.5px solid var(--border3)}
+.total-label{font-size:14px;font-weight:500;color:var(--text)}
+.total-val{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--text);letter-spacing:-0.02em}
+.wholesale-banner{background:var(--amber50);border:0.5px solid var(--amber100);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--amber800);margin-top:8px;display:none}
+
+/* USPS results */
+.usps-result-card{background:var(--bg2);border-radius:12px;padding:0 1.25rem;margin-bottom:10px}
+.usps-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:0.5px solid var(--border)}
+.usps-row:last-child{border-bottom:none}
+.usps-name{font-size:14px;font-weight:500;color:var(--text)}
+.usps-transit{font-size:12px;color:var(--text2);margin-top:2px}
+.usps-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.bdg{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px}
+.bdg-best{background:var(--green50);color:var(--green600)}
+.bdg-animal{background:var(--blue50);color:var(--blue800)}
+.bdg-fuel{background:var(--amber50);color:var(--amber800)}
+.bdg-dim{background:var(--red50);color:var(--red800)}
+.usps-price-block{text-align:right;flex-shrink:0;margin-left:12px}
+.retail-strike{font-size:12px;color:var(--text3);text-decoration:line-through}
+.usps-price{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--text)}
+.usps-breakdown-text{font-size:11px;color:var(--text2);margin-bottom:2px;line-height:1.6}
+
+/* Metrics */
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.metric-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text)}
+
+/* Section header */
+.section-header{display:flex;align-items:center;gap:8px;margin:1.5rem 0 0.75rem}
+.section-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.section-dot.blue{background:var(--blue400)}
+.section-dot.teal{background:#1D9E75}
+.section-title-text{font-size:13px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em}
+
+.note{font-size:11px;color:var(--text3);margin-top:1rem;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page-title">Fish shipping calculator</div>
+  <div class="page-sub">Merritt Island, FL 32953</div>
+
+  <!-- ─── SECTION 1: ORDER INFO ─── -->
+  <div class="section-header">
+    <div class="section-dot blue"></div>
+    <span class="section-title-text">รายละเอียดออเดอร์</span>
+  </div>
+
+  <div class="card">
+    <div class="field-label">จำนวนปลา</div>
+    <div class="fish-row">
+      <input class="fish-input" type="number" id="fishCount" value="1" min="1" oninput="onFishChange()" />
+      <span class="box-pill" id="boxPill">
+        <svg width="8" height="8" viewBox="0 0 8 8"><rect width="8" height="8" rx="1.5" fill="#378ADD"/></svg>
+        6" Box
+      </span>
+    </div>
+
+    <div class="field-divider"></div>
+
+    <div class="field-label">Temperature pack</div>
+    <div class="pack-row">
+      <div class="pack-opt sel-none" id="btn-none" onclick="setPack('none')">
+        <div class="pack-dot"></div>ไม่ใส่
+      </div>
+      <div class="pack-opt" id="btn-heat" onclick="setPack('heat')">
+        <div class="pack-dot"></div>Heat pack
+      </div>
+      <div class="pack-opt" id="btn-cold" onclick="setPack('cold')">
+        <div class="pack-dot"></div>Cold pack
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── SECTION 2: USPS SHIPPING ─── -->
+  <div class="section-header">
+    <div class="section-dot teal"></div>
+    <span class="section-title-text">USPS Domestic Shipping</span>
+  </div>
+
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div>
+        <div class="field-label">น้ำหนักจริง (lb)</div>
+        <div class="input-wrap" style="margin-top:0">
+          <input class="text-input" style="padding-left:12px" type="number" id="weight" min="0.01" max="70" step="0.01" oninput="calcAll()" placeholder="0.00" />
+        </div>
+        <div class="zone-hint" style="margin-top:4px">ค่าเริ่มต้นตามจำนวนปลา · แก้ไขได้</div>
+      </div>
+      <div>
+        <div class="field-label">ZIP ปลายทาง <span id="zpill"></span></div>
+        <input class="plain-input" type="text" id="zip" placeholder="12345" maxlength="5" oninput="onZip()" />
+        <div class="zone-hint" id="destState" style="margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="zone-hint" id="zhint">ต้นทาง: Merritt Island, FL 32953</div>
+    <div class="dimbox" id="dimbox"></div>
+
+    <div class="field-divider"></div>
+
+    <div style="margin-bottom:12px">
+      <div class="field-label" style="margin-bottom:8px">ประเภทบริการ</div>
+      <div style="display:flex;gap:8px">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--border2);background:var(--bg2);cursor:pointer;font-size:13px;font-weight:500;color:var(--text)" id="svc-pm-label">
+          <input type="radio" name="svcType" id="svcPM" value="pm" checked onchange="calcAll()" style="accent-color:var(--blue400);width:14px;height:14px;margin:0">
+          Priority Mail
+        </label>
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--border2);background:var(--bg2);cursor:pointer;font-size:13px;font-weight:500;color:var(--text)" id="svc-pme-label">
+          <input type="radio" name="svcType" id="svcPME" value="pme" onchange="calcAll()" style="accent-color:var(--blue400);width:14px;height:14px;margin:0">
+          Priority Mail Express
+        </label>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <input type="checkbox" id="animalChk" onchange="calcAll()" checked>
+      <div class="toggle-info">
+        <label class="toggle-label" for="animalChk">Animal handling surcharge</label>
+        <div class="toggle-sub">Priority Mail +$15.00 · Priority Mail Express +$7.50</div>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="fuelChk" onchange="toggleFuel()">
+      <div class="toggle-info">
+        <label class="toggle-label" for="fuelChk">Fuel surcharge</label>
+        <div class="toggle-sub">คิดเป็น % ของค่าส่ง (ไม่รวม animal fee)</div>
+        <div id="fuelRateRow" style="display:none">
+          <div class="fuel-rate-row">
+            <input class="fuel-input" type="number" id="fuelPct" value="3" min="0" max="100" step="0.1" oninput="calcAll()" />
+            <span class="fuel-pct">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── USPS RESULTS ─── -->
+  <div class="section-header">
+    <div class="section-dot teal"></div>
+    <span class="section-title-text">ค่าส่ง USPS</span>
+  </div>
+
+  <div id="uspsResult"></div>
+  <div id="wholesaleNote" style="display:none;background:var(--amber50);color:var(--amber800);border-radius:10px;padding:8px 14px;font-size:13px;border:0.5px solid var(--amber100);margin-bottom:10px">Wholesale (15+ fish) — กรุณาติดต่อเพื่อรับราคาพิเศษ</div>
+
+  <!-- ─── FISH FEE BREAKDOWN ─── -->
+  <div class="section-header">
+    <div class="section-dot blue"></div>
+    <span class="section-title-text">Fish fee breakdown</span>
+  </div>
+
+  <div class="breakdown-card">
+    <div id="fishBreakdownRows"></div>
+    <div class="total-row">
+      <span class="total-label">Fish fee รวม</span>
+      <span class="total-val" id="fishTotal">$0.00</span>
+    </div>
+    <div class="wholesale-banner" id="wholesaleBanner">Wholesale rate — จำนวนปลา ≥ 15 ตัว</div>
+  </div>
+
+  <div class="metrics" style="margin-bottom:10px">
+    <div class="metric"><div class="metric-label">Box / ตัว</div><div class="metric-val" id="m1">—</div></div>
+    <div class="metric"><div class="metric-label">Handling / ตัว</div><div class="metric-val" id="m2">$2.00</div></div>
+    <div class="metric"><div class="metric-label">Fish fee / ตัว</div><div class="metric-val" id="m3">—</div></div>
+  </div>
+
+  <!-- ─── GRAND TOTAL ─── -->
+  <div id="grandTotalCard" style="display:none">
+    <div class="section-header">
+      <div class="section-dot blue"></div>
+      <span class="section-title-text">ยอดรวมทั้งหมด</span>
+    </div>
+    <div class="breakdown-card">
+      <div id="grandRows"></div>
+      <div class="total-row">
+        <span class="total-label">Grand total</span>
+        <span class="total-val" id="grandTotal">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">* Commercial Base Rate (USPS Jan 2026) · Dim weight divisor = 139 (คิดเมื่อ > 1 cu ft) · ต้นทาง ZIP 32953</div>
+</div>
+
+<script>
+const SHIPMENT_PER_FISH=4.5,HANDLING=2,PACK_FEE=3;
+const FISH_BOXES=[
+  {label:'6" Box',max:1,fee:0.96,side:6},
+  {label:'8" Box',max:4,fee:2.72,side:8},
+  {label:'9" Box',max:8,fee:4.93,side:9},
+  {label:'10" Box',max:14,fee:8.04,side:10},
+  {label:'Wholesale',max:Infinity,fee:47.71,side:0}
+];
+let pack='none';
+
+function getFishBox(n){return FISH_BOXES.find(b=>n<=b.max);}
+function fmt(n){return'$'+n.toFixed(2);}
+function bdRow(label,val){return`<div class="bd-row"><span class="bd-label">${label}</span><span class="bd-val">${fmt(val)}</span></div>`;}
+
+function setPack(t){
+  pack=t;
+  ['none','heat','cold'].forEach(k=>{
+    document.getElementById('btn-'+k).className='pack-opt'+(k===t?' sel-'+k:'');
+  });
+  calcAll();
+}
+
+/* Default weight table */
+const DEFAULT_WEIGHT={1:1,2:1.5,3:2,4:2.5,5:3,6:3.5,7:4,8:5,9:5.5,10:6,17:10,33:16,34:16};
+function getDefaultWeight(n){
+  if(DEFAULT_WEIGHT[n]!==undefined)return DEFAULT_WEIGHT[n];
+  const keys=Object.keys(DEFAULT_WEIGHT).map(Number).sort((a,b)=>a-b);
+  for(let i=keys.length-1;i>=0;i--){if(keys[i]<=n)return DEFAULT_WEIGHT[keys[i]];}
+  return DEFAULT_WEIGHT[1];
+}
+
+function onFishChange(){
+  const fish=Math.max(1,parseInt(document.getElementById('fishCount').value)||1);
+  const box=getFishBox(fish);
+  const pill=document.getElementById('boxPill');
+  pill.innerHTML=`<svg width="8" height="8" viewBox="0 0 8 8"><rect width="8" height="8" rx="1.5" fill="#378ADD"/></svg> ${box.label}`;
+  document.getElementById('weight').value=getDefaultWeight(fish);
+  calcAll();
+}
+
+function toggleFuel(){
+  document.getElementById('fuelRateRow').style.display=document.getElementById('fuelChk').checked?'block':'none';
+  calcAll();
+}
+
+/* ─── USPS data ─── */
+const ZZ={320:2,321:2,322:2,323:2,324:2,325:2,326:2,327:2,328:2,329:1,330:2,331:2,332:2,333:2,334:2,335:2,336:2,337:2,338:2,339:2,341:2,342:2,344:2,346:2,347:2,349:2,300:3,301:3,302:3,303:3,304:3,305:3,306:3,307:3,308:3,309:3,310:3,311:3,312:3,313:3,314:3,315:3,316:3,317:3,318:3,319:3,295:3,296:3,297:3,298:3,299:3,350:3,351:3,352:3,354:3,355:3,356:3,357:3,358:3,359:3,360:3,361:3,362:3,363:3,364:3,365:3,366:3,367:3,368:3,369:3,370:3,371:3,372:3,373:3,374:3,376:3,377:3,378:3,379:3,385:3,386:3,387:3,388:3,389:3,390:3,391:3,392:3,393:3,394:3,395:3,396:3,397:3,398:3,399:3,270:4,271:4,272:4,273:4,274:4,275:4,276:4,277:4,278:4,279:4,280:4,281:4,282:4,283:4,284:4,285:4,286:4,287:4,288:4,289:4,290:4,291:4,292:4,293:4,294:4,375:4,380:4,381:4,382:4,383:4,384:4,400:4,401:4,402:4,403:4,404:4,405:4,406:4,407:4,408:4,409:4,410:4,411:4,412:4,413:4,414:4,415:4,416:4,417:4,418:4,420:4,421:4,422:4,423:4,424:4,425:4,426:4,427:4,430:4,431:4,432:4,433:4,434:4,435:4,436:4,437:4,438:4,439:4,440:4,441:4,442:4,443:4,444:4,445:4,446:4,447:4,448:4,449:4,450:4,451:4,452:4,453:4,454:4,455:4,456:4,457:4,458:4,460:4,461:4,462:4,463:4,464:4,465:4,466:4,467:4,468:4,469:4,470:4,471:4,472:4,473:4,474:4,475:4,476:4,477:4,478:4,479:4,700:4,701:4,703:4,704:4,705:4,706:4,707:4,708:4,710:4,711:4,712:4,713:4,714:4,716:4,717:4,718:4,719:4,200:5,201:5,202:5,203:5,204:5,205:5,206:5,207:5,208:5,209:5,210:5,211:5,212:5,214:5,215:5,216:5,217:5,218:5,219:5,220:5,221:5,222:5,223:5,224:5,225:5,226:5,227:5,228:5,229:5,230:5,231:5,232:5,233:5,234:5,235:5,236:5,237:5,238:5,239:5,240:5,241:5,242:5,243:5,244:5,245:5,246:5,247:5,248:5,249:5,250:5,251:5,252:5,253:5,254:5,255:5,256:5,257:5,258:5,259:5,260:5,261:5,262:5,263:5,264:5,265:5,266:5,267:5,268:5,480:5,481:5,482:5,483:5,484:5,485:5,486:5,487:5,488:5,489:5,490:5,491:5,492:5,493:5,494:5,495:5,496:5,497:5,498:5,499:5,500:5,501:5,502:5,503:5,504:5,505:5,506:5,507:5,510:5,511:5,512:5,513:5,514:5,515:5,516:5,520:5,521:5,522:5,523:5,524:5,525:5,526:5,527:5,528:5,600:5,601:5,602:5,603:5,604:5,605:5,606:5,607:5,608:5,609:5,610:5,611:5,612:5,613:5,614:5,615:5,616:5,617:5,618:5,619:5,620:5,621:5,622:5,623:5,624:5,625:5,626:5,627:5,628:5,629:5,630:5,631:5,633:5,634:5,635:5,636:5,637:5,638:5,639:5,640:5,641:5,644:5,645:5,646:5,647:5,648:5,650:5,651:5,652:5,653:5,654:5,655:5,656:5,657:5,658:5,660:5,661:5,662:5,664:5,665:5,666:5,667:5,668:5,670:5,671:5,672:5,673:5,674:5,675:5,676:5,677:5,678:5,679:5,680:5,681:5,683:5,684:5,685:5,686:5,687:5,688:5,689:5,690:5,691:5,692:5,693:5,730:5,731:5,734:5,735:5,736:5,737:5,738:5,739:5,740:5,741:5,743:5,744:5,745:5,746:5,747:5,748:5,749:5,750:5,751:5,752:5,753:5,754:5,755:5,756:5,757:5,758:5,759:5,760:5,761:5,762:5,763:5,764:5,765:5,766:5,767:5,768:5,769:5,770:5,772:5,773:5,774:5,775:5,776:5,777:5,778:5,779:5,780:5,781:5,782:5,783:5,784:5,785:5,786:5,787:5,788:5,789:5,790:5,791:5,792:5,793:5,794:5,795:5,796:5,797:5,798:5,799:5,530:6,531:6,532:6,534:6,535:6,537:6,538:6,539:6,540:6,541:6,542:6,543:6,544:6,545:6,546:6,547:6,548:6,549:6,550:6,551:6,553:6,554:6,555:6,556:6,557:6,558:6,559:6,560:6,561:6,562:6,563:6,564:6,565:6,566:6,567:6,570:6,571:6,572:6,573:6,574:6,575:6,576:6,577:6,580:6,581:6,582:6,583:6,584:6,585:6,586:6,587:6,588:6,590:6,591:6,592:6,593:6,594:6,595:6,596:6,597:6,598:6,599:6,800:6,801:6,802:6,803:6,804:6,805:6,806:6,807:6,808:6,809:6,810:6,811:6,812:6,813:6,814:6,815:6,816:6,820:6,821:6,822:6,823:6,824:6,825:6,826:6,827:6,828:6,829:6,830:6,831:6,100:6,101:6,102:6,103:6,104:6,105:6,106:6,107:6,108:6,109:6,110:6,111:6,112:6,113:6,114:6,115:6,116:6,117:6,118:6,119:6,120:6,121:6,122:6,123:6,124:6,125:6,126:6,127:6,128:6,129:6,130:6,131:6,132:6,133:6,134:6,135:6,136:6,137:6,138:6,139:6,140:6,141:6,142:6,143:6,144:6,145:6,146:6,147:6,148:6,149:6,150:6,151:6,152:6,153:6,154:6,155:6,156:6,157:6,158:6,159:6,160:6,161:6,162:6,163:6,164:6,165:6,166:6,167:6,168:6,169:6,170:6,171:6,172:6,173:6,174:6,175:6,176:6,177:6,178:6,179:6,180:6,181:6,182:6,183:6,184:6,185:6,186:6,187:6,188:6,189:6,190:6,191:6,192:6,193:6,194:6,195:6,196:6,832:7,833:7,834:7,835:7,836:7,837:8,838:7,840:7,841:7,842:7,843:7,844:7,845:7,846:7,847:7,850:7,851:7,852:7,853:7,855:7,856:7,857:7,859:7,860:7,863:7,864:7,865:7,870:7,871:7,872:7,873:7,874:7,875:7,876:7,877:7,878:7,879:7,880:7,881:7,882:7,883:7,884:7,889:7,890:7,891:7,893:8,894:8,895:8,897:8,898:8,900:8,901:8,902:8,903:8,904:8,905:8,906:8,907:8,908:8,910:8,911:8,912:8,913:8,914:8,915:8,916:8,917:8,918:8,919:8,920:8,921:8,922:8,923:8,924:8,925:8,926:8,927:8,928:8,930:8,931:8,932:8,933:8,934:8,935:8,936:8,937:8,938:8,939:8,940:8,941:8,942:8,943:8,944:8,945:8,946:8,947:8,948:8,949:8,950:8,951:8,952:8,953:8,954:8,955:8,956:8,957:8,958:8,959:8,960:8,961:8,967:8,968:8,995:8,996:8,997:8,998:8,999:8,80:4,81:4,82:4,83:4,84:4,85:4,86:4,87:4,88:4,89:4,197:6,198:6,199:6,213:5,269:5,340:2,343:2,345:2,348:2,353:3,419:4,428:4,429:4,459:4,508:5,509:5,517:5,518:5,519:5,529:5,533:5,536:5,552:6,568:6,569:6,578:6,579:6,589:6,632:5,642:5,643:5,649:5,659:5,663:5,669:5,682:5,694:5,695:5,696:5,697:5,698:5,699:5,702:4,709:4,715:5,720:5,721:5,722:5,723:5,724:5,725:5,726:5,727:5,728:5,729:4,732:5,733:5,742:5,771:5,817:5,818:5,819:5,839:7,848:7,849:7,854:7,858:7,861:6,862:6,866:6,867:6,868:6,869:6,885:7,886:7,887:7,888:7,892:8,896:8,899:8,909:8,929:8,962:8,963:8,964:8,965:8,966:8,969:8,970:8,971:8,972:8,973:8,974:8,975:8,976:8,977:8,978:8,979:8,980:8,981:8,982:8,983:8,984:8,985:8,986:8,987:8,988:8,989:8,990:8,991:8,992:8,993:8,994:8};
+/* PM direct commercial rate table — verified from USPS Click-N-Ship (origin 32953) */
+/* [maxLb, Z1-2, Z3, Z4, Z5, Z6, Z7, Z8] */
+const PM_C=[[1,8.48,8.48,10.59,11.82,12.32,12.25,12.19],[2,9.02,9.32,12.25,14.07,14.48,14.53,14.57],[3,9.57,10.35,13.9,16.31,16.77,16.86,16.94],[4,10.11,11.39,15.56,18.56,19.74,19.87,20.0],[5,10.66,12.42,17.21,20.8,22.7,22.88,23.06],[6,11.2,13.46,18.87,23.05,25.67,25.9,26.12],[7,11.2,13.46,18.87,23.05,25.67,25.9,26.12],[8,11.2,13.46,18.87,23.05,25.67,25.9,26.12],[9,11.49,13.46,18.87,23.05,25.67,25.9,26.12],[10,12.26,13.94,19.48,23.26,26.18,26.93,27.68],[15,16.49,18.79,26.62,31.99,36.35,37.47,38.59],[20,19.76,22.56,31.92,38.71,44.0,45.44,46.87],[25,23.76,27.18,38.53,46.69,53.11,54.94,56.76],[30,27.69,31.73,45.01,54.62,62.21,64.42,66.62],[35,31.69,36.35,51.53,62.6,71.28,73.9,76.51],[40,35.69,40.98,58.05,70.58,80.39,83.38,86.37],[50,43.66,50.19,71.1,86.49,98.56,102.33,106.09],[70,60.88,69.98,99.38,120.96,137.97,143.26,148.56]];
+/* PME retail table (still used with disc for PME) */
+const DISC={1:0.734,2:0.734,3:0.746,4:0.876,5:0.840,6:0.785,7:0.720,8:0.587};
+const PME_R=[[0.5,33.00,33.25,33.35,35.70,40.40,43.30,46.10,49.40],[1,33.25,33.65,35.45,40.25,47.70,51.60,54.85,58.15],[2,33.55,34.75,38.35,45.45,55.40,60.30,63.85,67.10],[3,33.90,35.85,41.15,50.60,63.25,69.10,72.95,76.05],[4,34.45,36.90,44.05,55.80,71.00,77.80,81.95,85.00],[5,35.00,38.00,46.80,60.95,78.70,86.50,91.05,94.00],[6,38.50,41.85,51.45,67.65,86.45,94.45,99.65,102.85],[7,42.05,45.60,56.05,74.35,94.15,102.45,108.25,111.65],[8,45.55,49.45,60.65,81.05,101.80,110.40,116.85,120.55],[9,49.15,53.20,65.20,87.70,109.55,118.35,125.50,129.35],[10,52.65,57.00,69.80,94.40,117.25,126.30,134.10,138.20],[15,65.25,73.00,95.90,120.90,143.30,151.15,160.15,165.65],[20,77.95,89.00,122.00,147.40,169.30,175.95,186.25,193.10],[30,107.85,126.00,180.45,209.15,237.95,245.20,257.90,267.70],[40,137.90,162.65,236.95,272.15,308.25,317.05,332.25,345.90],[50,167.70,198.95,292.65,338.05,381.00,393.95,411.60,429.60],[70,232.40,275.70,405.75,469.30,523.90,547.05,567.75,596.60]];
+
+function gz(z){return ZZ[parseInt(z.substring(0,3),10)]||null;}
+const ZS={0:'MA',1:'MA',2:'MA',3:'MA',4:'MA',5:'MA',6:'MA',7:'MA',8:'MA',9:'MA',10:'MA',11:'MA',12:'MA',13:'MA',14:'MA',15:'MA',16:'MA',17:'MA',18:'MA',19:'MA',20:'MA',21:'MA',22:'MA',23:'MA',24:'MA',25:'MA',26:'MA',27:'MA',28:'RI',29:'RI',30:'NH',31:'NH',32:'NH',33:'NH',34:'NH',35:'NH',36:'NH',37:'NH',38:'NH',39:'ME',40:'ME',41:'ME',42:'ME',43:'ME',44:'ME',45:'ME',46:'ME',47:'ME',48:'ME',49:'ME',50:'VT',51:'VT',52:'VT',53:'VT',54:'VT',55:'VT',56:'VT',57:'VT',58:'VT',59:'VT',60:'CT',61:'CT',62:'CT',63:'CT',64:'CT',65:'CT',66:'CT',67:'CT',68:'CT',69:'CT',70:'NJ',71:'NJ',72:'NJ',73:'NJ',74:'NJ',75:'NJ',76:'NJ',77:'NJ',78:'NJ',79:'NJ',80:'NJ',81:'NJ',82:'NJ',83:'NJ',84:'NJ',85:'NJ',86:'NJ',87:'NJ',88:'NJ',89:'NJ',100:'NY',101:'NY',102:'NY',103:'NY',104:'NY',105:'NY',106:'NY',107:'NY',108:'NY',109:'NY',110:'NY',111:'NY',112:'NY',113:'NY',114:'NY',115:'NY',116:'NY',117:'NY',118:'NY',119:'NY',120:'NY',121:'NY',122:'NY',123:'NY',124:'NY',125:'NY',126:'NY',127:'NY',128:'NY',129:'NY',130:'NY',131:'NY',132:'NY',133:'NY',134:'NY',135:'NY',136:'NY',137:'NY',138:'NY',139:'NY',140:'NY',141:'NY',142:'NY',143:'NY',144:'NY',145:'NY',146:'NY',147:'NY',148:'NY',149:'NY',150:'PA',151:'PA',152:'PA',153:'PA',154:'PA',155:'PA',156:'PA',157:'PA',158:'PA',159:'PA',160:'PA',161:'PA',162:'PA',163:'PA',164:'PA',165:'PA',166:'PA',167:'PA',168:'PA',169:'PA',170:'PA',171:'PA',172:'PA',173:'PA',174:'PA',175:'PA',176:'PA',177:'PA',178:'PA',179:'PA',180:'PA',181:'PA',182:'PA',183:'PA',184:'PA',185:'PA',186:'PA',187:'PA',188:'PA',189:'PA',190:'PA',191:'PA',192:'PA',193:'PA',194:'PA',195:'PA',196:'PA',197:'DE',198:'DE',199:'DE',200:'DC',201:'DC',202:'DC',203:'DC',204:'DC',205:'DC',206:'MD',207:'MD',208:'MD',209:'MD',210:'MD',211:'MD',212:'MD',213:'MD',214:'MD',215:'MD',216:'MD',217:'MD',218:'MD',219:'MD',220:'VA',221:'VA',222:'VA',223:'VA',224:'VA',225:'VA',226:'VA',227:'VA',228:'VA',229:'VA',230:'VA',231:'VA',232:'VA',233:'VA',234:'VA',235:'VA',236:'VA',237:'VA',238:'VA',239:'VA',240:'VA',241:'VA',242:'VA',243:'VA',244:'VA',245:'VA',246:'VA',247:'WV',248:'WV',249:'WV',250:'WV',251:'WV',252:'WV',253:'WV',254:'WV',255:'WV',256:'WV',257:'WV',258:'WV',259:'WV',260:'WV',261:'WV',262:'WV',263:'WV',264:'WV',265:'WV',266:'WV',267:'WV',268:'WV',269:'WV',270:'NC',271:'NC',272:'NC',273:'NC',274:'NC',275:'NC',276:'NC',277:'NC',278:'NC',279:'NC',280:'NC',281:'NC',282:'NC',283:'NC',284:'NC',285:'NC',286:'NC',287:'NC',288:'NC',289:'NC',290:'SC',291:'SC',292:'SC',293:'SC',294:'SC',295:'SC',296:'SC',297:'SC',298:'SC',299:'SC',300:'GA',301:'GA',302:'GA',303:'GA',304:'GA',305:'GA',306:'GA',307:'GA',308:'GA',309:'GA',310:'GA',311:'GA',312:'GA',313:'GA',314:'GA',315:'GA',316:'GA',317:'GA',318:'GA',319:'GA',320:'FL',321:'FL',322:'FL',323:'FL',324:'FL',325:'FL',326:'FL',327:'FL',328:'FL',329:'FL',330:'FL',331:'FL',332:'FL',333:'FL',334:'FL',335:'FL',336:'FL',337:'FL',338:'FL',339:'FL',340:'FL',341:'FL',342:'FL',343:'FL',344:'FL',345:'FL',346:'FL',347:'FL',348:'FL',349:'FL',350:'AL',351:'AL',352:'AL',353:'AL',354:'AL',355:'AL',356:'AL',357:'AL',358:'AL',359:'AL',360:'AL',361:'AL',362:'AL',363:'AL',364:'AL',365:'AL',366:'AL',367:'AL',368:'AL',369:'AL',370:'TN',371:'TN',372:'TN',373:'TN',374:'TN',375:'TN',376:'TN',377:'TN',378:'TN',379:'TN',380:'TN',381:'TN',382:'TN',383:'TN',384:'TN',385:'TN',386:'MS',387:'MS',388:'MS',389:'MS',390:'MS',391:'MS',392:'MS',393:'MS',394:'MS',395:'MS',396:'MS',397:'MS',398:'MS',399:'MS',400:'KY',401:'KY',402:'KY',403:'KY',404:'KY',405:'KY',406:'KY',407:'KY',408:'KY',409:'KY',410:'KY',411:'KY',412:'KY',413:'KY',414:'KY',415:'KY',416:'KY',417:'KY',418:'KY',419:'KY',420:'KY',421:'KY',422:'KY',423:'KY',424:'KY',425:'KY',426:'KY',427:'KY',428:'KY',429:'KY',430:'OH',431:'OH',432:'OH',433:'OH',434:'OH',435:'OH',436:'OH',437:'OH',438:'OH',439:'OH',440:'OH',441:'OH',442:'OH',443:'OH',444:'OH',445:'OH',446:'OH',447:'OH',448:'OH',449:'OH',450:'OH',451:'OH',452:'OH',453:'OH',454:'OH',455:'OH',456:'OH',457:'OH',458:'OH',459:'OH',460:'IN',461:'IN',462:'IN',463:'IN',464:'IN',465:'IN',466:'IN',467:'IN',468:'IN',469:'IN',470:'IN',471:'IN',472:'IN',473:'IN',474:'IN',475:'IN',476:'IN',477:'IN',478:'IN',479:'IN',480:'MI',481:'MI',482:'MI',483:'MI',484:'MI',485:'MI',486:'MI',487:'MI',488:'MI',489:'MI',490:'MI',491:'MI',492:'MI',493:'MI',494:'MI',495:'MI',496:'MI',497:'MI',498:'MI',499:'MI',500:'IA',501:'IA',502:'IA',503:'IA',504:'IA',505:'IA',506:'IA',507:'IA',508:'IA',509:'IA',510:'IA',511:'IA',512:'IA',513:'IA',514:'IA',515:'IA',516:'IA',517:'IA',518:'IA',519:'IA',520:'IA',521:'IA',522:'IA',523:'IA',524:'IA',525:'IA',526:'IA',527:'IA',528:'IA',529:'IA',530:'WI',531:'WI',532:'WI',533:'WI',534:'WI',535:'WI',536:'WI',537:'WI',538:'WI',539:'WI',540:'WI',541:'WI',542:'WI',543:'WI',544:'WI',545:'WI',546:'WI',547:'WI',548:'WI',549:'WI',550:'MN',551:'MN',552:'MN',553:'MN',554:'MN',555:'MN',556:'MN',557:'MN',558:'MN',559:'MN',560:'MN',561:'MN',562:'MN',563:'MN',564:'MN',565:'MN',566:'MN',567:'MN',570:'SD',571:'SD',572:'SD',573:'SD',574:'SD',575:'SD',576:'SD',577:'SD',578:'SD',579:'SD',580:'ND',581:'ND',582:'ND',583:'ND',584:'ND',585:'ND',586:'ND',587:'ND',588:'ND',589:'ND',590:'MT',591:'MT',592:'MT',593:'MT',594:'MT',595:'MT',596:'MT',597:'MT',598:'MT',599:'MT',600:'IL',601:'IL',602:'IL',603:'IL',604:'IL',605:'IL',606:'IL',607:'IL',608:'IL',609:'IL',610:'IL',611:'IL',612:'IL',613:'IL',614:'IL',615:'IL',616:'IL',617:'IL',618:'IL',619:'IL',620:'IL',621:'IL',622:'IL',623:'IL',624:'IL',625:'IL',626:'IL',627:'IL',628:'IL',629:'IL',630:'MO',631:'MO',632:'MO',633:'MO',634:'MO',635:'MO',636:'MO',637:'MO',638:'MO',639:'MO',640:'MO',641:'MO',642:'MO',643:'MO',644:'MO',645:'MO',646:'MO',647:'MO',648:'MO',649:'MO',650:'MO',651:'MO',652:'MO',653:'MO',654:'MO',655:'MO',656:'MO',657:'MO',658:'MO',659:'MO',660:'KS',661:'KS',662:'KS',663:'KS',664:'KS',665:'KS',666:'KS',667:'KS',668:'KS',669:'KS',670:'KS',671:'KS',672:'KS',673:'KS',674:'KS',675:'KS',676:'KS',677:'KS',678:'KS',679:'KS',680:'NE',681:'NE',682:'NE',683:'NE',684:'NE',685:'NE',686:'NE',687:'NE',688:'NE',689:'NE',690:'NE',691:'NE',692:'NE',693:'NE',694:'NE',695:'NE',696:'NE',697:'NE',698:'NE',699:'NE',700:'LA',701:'LA',702:'LA',703:'LA',704:'LA',705:'LA',706:'LA',707:'LA',708:'LA',709:'LA',710:'LA',711:'LA',712:'LA',713:'LA',714:'LA',715:'LA',716:'AR',717:'AR',718:'AR',719:'AR',720:'AR',721:'AR',722:'AR',723:'AR',724:'AR',725:'AR',726:'AR',727:'AR',728:'AR',729:'AR',730:'OK',731:'OK',732:'OK',733:'OK',734:'OK',735:'OK',736:'OK',737:'OK',738:'OK',739:'OK',740:'OK',741:'OK',742:'OK',743:'OK',744:'OK',745:'OK',746:'OK',747:'OK',748:'OK',749:'OK',750:'TX',751:'TX',752:'TX',753:'TX',754:'TX',755:'TX',756:'TX',757:'TX',758:'TX',759:'TX',760:'TX',761:'TX',762:'TX',763:'TX',764:'TX',765:'TX',766:'TX',767:'TX',768:'TX',769:'TX',770:'TX',771:'TX',772:'TX',773:'TX',774:'TX',775:'TX',776:'TX',777:'TX',778:'TX',779:'TX',780:'TX',781:'TX',782:'TX',783:'TX',784:'TX',785:'TX',786:'TX',787:'TX',788:'TX',789:'TX',790:'TX',791:'TX',792:'TX',793:'TX',794:'TX',795:'TX',796:'TX',797:'TX',798:'TX',799:'TX',800:'CO',801:'CO',802:'CO',803:'CO',804:'CO',805:'CO',806:'CO',807:'CO',808:'CO',809:'CO',810:'CO',811:'CO',812:'CO',813:'CO',814:'CO',815:'CO',816:'CO',817:'CO',818:'CO',819:'CO',820:'WY',821:'WY',822:'WY',823:'WY',824:'WY',825:'WY',826:'WY',827:'WY',828:'WY',829:'WY',830:'WY',831:'WY',832:'ID',833:'ID',834:'ID',835:'ID',836:'ID',837:'ID',838:'ID',840:'UT',841:'UT',842:'UT',843:'UT',844:'UT',845:'UT',846:'UT',847:'UT',848:'NV',849:'NV',850:'AZ',851:'AZ',852:'AZ',853:'AZ',854:'AZ',855:'AZ',856:'AZ',857:'AZ',858:'AZ',859:'AZ',860:'AZ',861:'AZ',862:'AZ',863:'AZ',864:'AZ',865:'AZ',870:'NM',871:'NM',872:'NM',873:'NM',874:'NM',875:'NM',876:'NM',877:'NM',878:'NM',879:'NM',880:'NM',881:'NM',882:'NM',883:'NM',884:'NM',885:'NV',886:'NV',887:'NV',888:'NV',889:'NV',890:'NV',891:'NV',892:'NV',893:'NV',894:'NV',895:'NV',896:'NV',897:'NV',898:'NV',899:'NV',900:'CA',901:'CA',902:'CA',903:'CA',904:'CA',905:'CA',906:'CA',907:'CA',908:'CA',909:'CA',910:'CA',911:'CA',912:'CA',913:'CA',914:'CA',915:'CA',916:'CA',917:'CA',918:'CA',919:'CA',920:'CA',921:'CA',922:'CA',923:'CA',924:'CA',925:'CA',926:'CA',927:'CA',928:'CA',929:'CA',930:'CA',931:'CA',932:'CA',933:'CA',934:'CA',935:'CA',936:'CA',937:'CA',938:'CA',939:'CA',940:'CA',941:'CA',942:'CA',943:'CA',944:'CA',945:'CA',946:'CA',947:'CA',948:'CA',949:'CA',950:'CA',951:'CA',952:'CA',953:'CA',954:'CA',955:'CA',956:'CA',957:'CA',958:'CA',959:'CA',960:'CA',961:'CA',962:'HI',963:'HI',964:'HI',965:'HI',966:'HI',967:'HI',968:'HI',969:'GU',970:'OR',971:'OR',972:'OR',973:'OR',974:'OR',975:'OR',976:'OR',977:'OR',978:'OR',979:'OR',980:'WA',981:'WA',982:'WA',983:'WA',984:'WA',985:'WA',986:'WA',987:'WA',988:'WA',989:'WA',990:'WA',991:'WA',992:'WA',993:'WA',994:'WA',995:'AK',996:'AK',997:'AK',998:'AK',999:'AK'};
+const SN={'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','Washington DC':'DC','Guam':'GU'};
+function getState(z){const abbr=ZS[parseInt(z.substring(0,3),10)];return abbr?SN[abbr]||abbr:null;}
+function pmComm(lbs,zone){const col=zone<=2?1:zone<=3?2:zone<=4?3:zone<=5?4:zone<=6?5:zone<=7?6:7;for(let i=0;i<PM_C.length;i++){if(lbs<=PM_C[i][0])return PM_C[i][col];}return PM_C[PM_C.length-1][col];}
+function pmRetail(lbs,zone){const col=zone<=2?1:zone<=3?2:zone<=4?3:zone<=5?4:zone<=6?5:zone<=7?6:7;const PM_R=[[1,8.50,9.25,10.35,11.75,13.25,15.25,17.00],[2,9.10,10.00,11.25,13.45,15.40,17.85,20.10],[3,9.95,10.90,12.50,15.10,17.65,20.60,23.35],[4,10.85,11.95,13.90,16.90,19.90,23.40,26.70],[5,11.70,13.00,15.25,18.70,22.15,26.20,30.10],[6,15.25,18.05,21.55,27.45,32.70,38.75,44.50],[7,15.25,18.05,21.55,27.45,32.70,38.75,44.50],[8,14.65,16.35,19.35,24.05,28.85,34.55,40.30],[9,15.65,17.50,20.80,25.90,31.10,37.35,43.70],[10,16.70,18.70,22.25,27.70,33.35,40.15,47.15],[15,22.45,25.20,30.40,38.10,46.30,55.70,65.75],[20,26.90,30.25,36.45,46.10,56.05,67.55,79.85],[25,32.35,36.45,44.00,55.60,67.65,81.65,96.70],[30,37.70,42.55,51.40,65.05,79.25,95.70,113.50],[35,43.15,48.75,58.85,74.55,90.80,109.80,130.35],[40,48.60,54.95,66.30,84.05,102.40,123.85,147.15],[50,59.45,67.30,81.20,103.00,125.55,151.95,180.75],[70,82.90,93.85,113.50,144.05,175.75,212.60,253.10]];for(let i=0;i<PM_R.length;i++){if(lbs<=PM_R[i][0])return PM_R[i][col];}return PM_R[PM_R.length-1][col];}
+function pmeRetail(lbs,zone){const col=zone<=1?1:zone<=2?2:zone<=3?3:zone<=4?4:zone<=5?5:zone<=6?6:zone<=7?7:8;for(let i=0;i<PME_R.length;i++){if(lbs<=PME_R[i][0])return PME_R[i][col];}return PME_R[PME_R.length-1][col];}
+function pmeComm(lbs,zone){return parseFloat((pmeRetail(lbs,zone)*(DISC[zone]||0.80)).toFixed(2));}
+
+function onZip(){
+  const v=document.getElementById('zip').value.replace(/\D/g,'').substring(0,5);
+  document.getElementById('zip').value=v;
+  const p=document.getElementById('zpill');const h=document.getElementById('zhint');const el=document.getElementById('zip');
+  const ds=document.getElementById('destState');
+  if(v.length===5){const z=gz(v);const st=getState(v);if(z){p.className='zpill z'+z;p.textContent='Zone '+z;h.textContent='ต้นทาง: Merritt Island, FL 32953';ds.textContent=st?'ปลายทาง: '+st:'';el.classList.remove('inv');}else{p.textContent='';h.textContent='ไม่พบ Zone สำหรับ ZIP นี้';ds.textContent='';el.classList.add('inv');}}
+  else{p.textContent='';h.textContent='ต้นทาง: Merritt Island, FL 32953';ds.textContent='';el.classList.remove('inv');}
+  calcAll();
+}
+
+function calcAll(){
+  const fish=Math.max(1,parseInt(document.getElementById('fishCount').value)||1);
+  const actualLb=parseFloat(document.getElementById('weight').value)||0;
+  const zv=document.getElementById('zip').value;
+  const animalOn=document.getElementById('animalChk').checked;
+  const fuelOn=document.getElementById('fuelChk').checked;
+  const fuelPct=(parseFloat(document.getElementById('fuelPct').value)||0)/100;
+
+  const box=getFishBox(fish);
+  const shipment=SHIPMENT_PER_FISH*fish;
+  const handling=HANDLING*fish;
+  const packFee=pack!=='none'?PACK_FEE:0;
+  const packName=pack==='heat'?'Heat pack':'Cold pack';
+
+  document.getElementById('boxPill').innerHTML=`<svg width="8" height="8" viewBox="0 0 8 8"><rect width="8" height="8" rx="1.5" fill="#378ADD"/></svg> ${box.label}`;
+  document.getElementById('wholesaleBanner').style.display=fish>=15?'block':'none';
+
+  /* USPS calc first to get delivery fee */
+  const uspsEl=document.getElementById('uspsResult');
+  const wnEl=document.getElementById('wholesaleNote');
+  const gtCard=document.getElementById('grandTotalCard');
+  const db=document.getElementById('dimbox');
+
+  let uspsForGrand=[];
+  let deliveryFee=0;
+
+  if(fish>=15){wnEl.style.display='block';uspsEl.innerHTML='';db.classList.remove('on');gtCard.style.display='none';}
+  else{
+    wnEl.style.display='none';
+    if(actualLb>0&&zv.length===5){
+      const zone=gz(zv);
+      if(zone){
+        const side=box.side;const cuIn=side*side*side;
+        const dimLb=cuIn/139;const useDim=cuIn>1728&&dimLb>actualLb;const billLb=useDim?dimLb:actualLb;
+        if(side>0){
+          if(cuIn>1728){let msg=`Dim weight: <strong>${dimLb.toFixed(2)} lb</strong> (${side}³÷139) · น้ำหนักจริง: ${actualLb.toFixed(2)} lb · `;msg+=useDim?`<span class="dimhl">ใช้ dim weight ${dimLb.toFixed(2)} lb</span>`:`ใช้น้ำหนักจริง ${actualLb.toFixed(2)} lb`;db.innerHTML=msg;}
+          else{db.innerHTML=`กล่อง ${side}" = ${cuIn} cu in ≤ 1,728 cu in → ไม่คิด dim weight`;}
+          db.classList.add('on');
+        }else db.classList.remove('on');
+
+        const isPM=document.getElementById('svcPM').checked;
+        const allSvcs=[
+          {name:'Priority Mail',transit:'1-3 วันทำการ',af:15.00,base:pmComm(billLb,zone),retail:pmRetail(billLb,zone)},
+          {name:'Priority Mail Express',transit:'1-2 วันทำการ (รับประกัน)',af:7.50,base:pmeComm(billLb,zone),retail:pmeRetail(billLb,zone)}
+        ];
+        /* show only selected service */
+        const svcs=isPM?[allSvcs[0]]:[allSvcs[1]];
+
+        let html='<div class="usps-result-card">';
+        svcs.forEach(sv=>{
+          const af=animalOn?sv.af:0;
+          const ff=fuelOn?parseFloat((sv.base*fuelPct).toFixed(2)):0;
+          const tot=sv.base+af+ff;
+          uspsForGrand.push({name:sv.name,base:sv.base,af,ff,tot});
+          const hasX=animalOn||fuelOn;
+          html+=`<div class="usps-row"><div style="flex:1"><div class="usps-name">${sv.name}</div><div class="usps-transit">${sv.transit}</div>`;
+          const badges=[];
+          if(useDim)badges.push('<span class="bdg bdg-dim">dim weight</span>');
+          if(animalOn)badges.push(`<span class="bdg bdg-animal">animal +${fmt(af)}</span>`);
+          if(fuelOn)badges.push(`<span class="bdg bdg-fuel">fuel +${fmt(ff)}</span>`);
+          if(badges.length)html+=`<div class="usps-badges">${badges.join('')}</div>`;
+          html+=`</div><div class="usps-price-block">`;
+          if(hasX){html+=`<div class="usps-breakdown-text">commercial ${fmt(sv.base)}${animalOn?' + animal '+fmt(af):''}${fuelOn?' + fuel '+fmt(ff):''}</div><div class="usps-price">${fmt(tot)}</div>`;}
+          else{html+=`<div class="retail-strike">retail ${fmt(sv.retail)}</div><div class="usps-price">${fmt(sv.base)}</div>`;}
+          html+=`</div></div>`;
+        });
+        html+='</div>';
+        uspsEl.innerHTML=html;
+        deliveryFee=uspsForGrand[0].tot;
+      }else{uspsEl.innerHTML='';db.classList.remove('on');gtCard.style.display='none';}
+    }else{uspsEl.innerHTML='';db.classList.remove('on');gtCard.style.display='none';}
+  }
+
+  /* Fish fee calc (uses deliveryFee from USPS) */
+  const fishFeeTotal=shipment+box.fee+handling+packFee+deliveryFee;
+
+  let fishRows=bdRow(`Shipment fee (${fish} × $${SHIPMENT_PER_FISH})`,shipment)
+    +bdRow(`Box & equipment — ${box.label}`,box.fee)
+    +bdRow(`Handling fee (${fish} × $${HANDLING})`,handling);
+  if(pack!=='none')fishRows+=bdRow(packName,packFee);
+  fishRows+=bdRow('Delivery fee (USPS)',deliveryFee);
+  document.getElementById('fishBreakdownRows').innerHTML=fishRows;
+  document.getElementById('fishTotal').textContent=fmt(fishFeeTotal);
+  document.getElementById('m1').textContent=fmt(box.fee/fish);
+  document.getElementById('m2').textContent=fmt(HANDLING);
+  document.getElementById('m3').textContent=fmt(fishFeeTotal/fish);
+
+  /* Grand total — fish_fee_total already includes delivery, no need to add USPS again */
+  if(uspsForGrand.length>0){
+    gtCard.style.display='block';
+    const cheapestUsps=uspsForGrand[0];
+    let gRows=bdRow(`Shipment fee (${fish} × $${SHIPMENT_PER_FISH})`,shipment);
+    gRows+=bdRow(`Box & equipment — ${box.label}`,box.fee);
+    gRows+=bdRow(`Handling fee (${fish} × $${HANDLING})`,handling);
+    if(pack!=='none')gRows+=bdRow(packName,packFee);
+    gRows+=bdRow(`Delivery — ${cheapestUsps.name}`,cheapestUsps.tot);
+    document.getElementById('grandRows').innerHTML=gRows;
+    document.getElementById('grandTotal').textContent=fmt(fishFeeTotal);
+  }
+}
+
+document.getElementById('weight').value=getDefaultWeight(1);
+calcAll();
+</script>
+</body>
+</html>
