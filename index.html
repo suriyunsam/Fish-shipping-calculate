@@ -249,39 +249,25 @@ select:focus{outline:none;border-color:var(--blue400);box-shadow:0 0 0 3px var(-
   <div id="uspsResult"></div>
   <div id="wholesaleNote" style="display:none;background:var(--amber50);color:var(--amber800);border-radius:10px;padding:8px 14px;font-size:13px;border:0.5px solid var(--amber100);margin-bottom:10px">Wholesale (15+ fish) — กรุณาติดต่อเพื่อรับราคาพิเศษ</div>
 
-  <!-- ─── FISH FEE BREAKDOWN ─── -->
+  <!-- ─── GRAND TOTAL ─── -->
   <div class="section-header">
     <div class="section-dot blue"></div>
-    <span class="section-title-text">Fish fee breakdown</span>
+    <span class="section-title-text">ยอดรวมทั้งหมด</span>
   </div>
 
-  <div class="breakdown-card">
-    <div id="fishBreakdownRows"></div>
-    <div class="total-row">
-      <span class="total-label">Fish fee รวม</span>
-      <span class="total-val" id="fishTotal">$0.00</span>
-    </div>
-    <div class="wholesale-banner" id="wholesaleBanner">Wholesale rate — จำนวนปลา ≥ 15 ตัว</div>
-  </div>
-
-  <div class="metrics" style="margin-bottom:10px">
-    <div class="metric"><div class="metric-label">Box / ตัว</div><div class="metric-val" id="m1">—</div></div>
-    <div class="metric"><div class="metric-label">Handling / ตัว</div><div class="metric-val" id="m2">$2.00</div></div>
-    <div class="metric"><div class="metric-label">Fish fee / ตัว</div><div class="metric-val" id="m3">—</div></div>
-  </div>
-
-  <!-- ─── GRAND TOTAL ─── -->
   <div id="grandTotalCard" style="display:none">
-    <div class="section-header">
-      <div class="section-dot blue"></div>
-      <span class="section-title-text">ยอดรวมทั้งหมด</span>
-    </div>
     <div class="breakdown-card">
       <div id="grandRows"></div>
       <div class="total-row">
         <span class="total-label">Grand total</span>
         <span class="total-val" id="grandTotal">$0.00</span>
       </div>
+      <div class="wholesale-banner" id="wholesaleBanner">Wholesale rate — จำนวนปลา ≥ 15 ตัว</div>
+    </div>
+    <div class="metrics" style="margin-top:10px">
+      <div class="metric"><div class="metric-label">Box / ตัว</div><div class="metric-val" id="m1">—</div></div>
+      <div class="metric"><div class="metric-label">Grand total / ตัว</div><div class="metric-val" id="m3">—</div></div>
+      <div class="metric"><div class="metric-label">Delivery (USPS)</div><div class="metric-val" id="m2">—</div></div>
     </div>
   </div>
 
@@ -438,28 +424,28 @@ function calcAll(){
   /* Fish fee calc (uses deliveryFee from USPS) */
   const fishFeeTotal=shipment+box.fee+handling+packFee+deliveryFee;
 
-  let fishRows=bdRow(`Shipment fee (${fish} × $${SHIPMENT_PER_FISH})`,shipment)
-    +bdRow(`Box & equipment — ${box.label}`,box.fee)
-    +bdRow(`Handling fee (${fish} × $${HANDLING})`,handling);
-  if(pack!=='none')fishRows+=bdRow(packName,packFee);
-  fishRows+=bdRow('Delivery fee (USPS)',deliveryFee);
-  document.getElementById('fishBreakdownRows').innerHTML=fishRows;
-  document.getElementById('fishTotal').textContent=fmt(fishFeeTotal);
-  document.getElementById('m1').textContent=fmt(box.fee/fish);
-  document.getElementById('m2').textContent=fmt(HANDLING);
-  document.getElementById('m3').textContent=fmt(fishFeeTotal/fish);
-
-  /* Grand total — fish_fee_total already includes delivery, no need to add USPS again */
+  /* Grand total */
+  document.getElementById('wholesaleBanner').style.display=fish>=15?'block':'none';
   if(uspsForGrand.length>0){
     gtCard.style.display='block';
-    const cheapestUsps=uspsForGrand[0];
-    let gRows=bdRow(`Shipment fee (${fish} × $${SHIPMENT_PER_FISH})`,shipment);
+    const sv=uspsForGrand[0];
+    const af=sv.af;const ff=sv.ff;
+    let gRows='';
+    gRows+=bdRow(`Shipment fee (${fish} × $${SHIPMENT_PER_FISH})`,shipment);
     gRows+=bdRow(`Box & equipment — ${box.label}`,box.fee);
     gRows+=bdRow(`Handling fee (${fish} × $${HANDLING})`,handling);
     if(pack!=='none')gRows+=bdRow(packName,packFee);
-    gRows+=bdRow(`Delivery — ${cheapestUsps.name}`,cheapestUsps.tot);
+    gRows+=`<div class="bd-row" style="border-top:0.5px dashed var(--color-border-secondary);margin-top:4px;padding-top:8px"><span class="bd-label" style="color:var(--color-text-tertiary);font-size:12px">${sv.name}</span></div>`;
+    gRows+=bdRow('Commercial rate',sv.base);
+    if(af>0)gRows+=bdRow('Animal handling surcharge',af);
+    if(ff>0)gRows+=bdRow('Fuel surcharge',ff);
     document.getElementById('grandRows').innerHTML=gRows;
     document.getElementById('grandTotal').textContent=fmt(fishFeeTotal);
+    document.getElementById('m1').textContent=fmt(box.fee/fish);
+    document.getElementById('m2').textContent=fmt(sv.tot);
+    document.getElementById('m3').textContent=fmt(fishFeeTotal/fish);
+  } else {
+    gtCard.style.display='none';
   }
 }
 
